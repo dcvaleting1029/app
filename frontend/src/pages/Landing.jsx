@@ -31,8 +31,10 @@ export default function Landing() {
   return (
     <div className="relative min-h-screen bg-[#050505] text-white">
       <div className="noise-overlay" />
-      <TopBar />
-      <Navbar onBook={openBooking} />
+      <div className="fixed top-0 left-0 right-0 z-40">
+        <TopBar />
+        <Navbar onBook={openBooking} />
+      </div>
 
       <main className="relative">
         <Hero onBook={openBooking} bookingRef={bookingRef} />

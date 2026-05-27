@@ -11,7 +11,7 @@ export default function TopBar() {
   return (
     <div
       data-testid="top-bar"
-      className="relative z-30 w-full bg-transparent"
+      className="relative z-30 w-full bg-black border-b border-white/10"
     >
       <div className="mx-auto max-w-[1480px] px-6">
         <div className="flex items-center justify-center gap-6 py-2 text-[11px] uppercase tracking-[0.18em] text-white/70 overflow-x-auto no-scrollbar">

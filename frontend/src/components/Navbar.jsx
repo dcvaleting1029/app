@@ -22,7 +22,7 @@ export default function Navbar({ onBook }) {
   return (
     <header
       data-testid="navbar"
-      className="sticky top-0 z-40 bg-transparent"
+      className="bg-transparent"
     >
       <div className="mx-auto max-w-[1480px] px-6">
         <div className="flex items-center justify-between h-[72px]">
