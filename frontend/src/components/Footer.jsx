@@ -27,9 +27,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 lg:col-span-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-md silver-border-strong flex items-center justify-center bg-gradient-to-br from-white/15 to-transparent">
-                <span className="font-display text-white text-[15px] leading-none">DC</span>
-              </div>
+              <img
+                src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/40jiimj9_WhatsApp%20Image%202026-05-27%20at%2023.01.29%20%281%29.jpeg"
+                alt="DC Valeting"
+                className="h-14 w-14 object-contain rounded-md"
+              />
               <div className="flex flex-col leading-none">
                 <span className="font-display text-white text-[20px] tracking-[0.16em]">
                   DC VALETING

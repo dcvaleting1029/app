@@ -34,13 +34,13 @@ export default function Navbar({ onBook }) {
         <div className="flex items-center justify-between h-[72px]">
           {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group" data-testid="logo">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-md silver-border-strong flex items-center justify-center bg-gradient-to-br from-white/15 to-transparent">
-                <span className="font-display text-white text-[15px] leading-none">DC</span>
-              </div>
-              <div className="absolute inset-0 rounded-md ring-1 ring-white/20 pointer-events-none" />
-            </div>
-            <div className="flex flex-col leading-none">
+            <img
+              src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/40jiimj9_WhatsApp%20Image%202026-05-27%20at%2023.01.29%20%281%29.jpeg"
+              alt="DC Valeting"
+              className="h-12 w-12 lg:h-14 lg:w-14 object-contain rounded-md"
+              style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.08))" }}
+            />
+            <div className="hidden sm:flex flex-col leading-none">
               <span className="font-display text-white text-[18px] tracking-[0.18em]">
                 DC VALETING
               </span>
