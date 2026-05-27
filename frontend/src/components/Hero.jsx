@@ -38,10 +38,9 @@ export default function Hero({ onBook, bookingRef }) {
         opacity: 0.35,
         scale: 1.08,
         letterSpacing: "-0.04em",
-        filter: isMobile ? "blur(4px)" : "blur(8px)",
         transformPerspective: 900,
         rotateX: 6,
-        willChange: "transform, opacity, filter",
+        willChange: "transform, opacity",
       });
 
       gsap.set(subtitleRef.current, { y: 20, opacity: 0 });
@@ -75,7 +74,6 @@ export default function Hero({ onBook, bookingRef }) {
           opacity: 1,
           scale: 1,
           letterSpacing: "0.01em",
-          filter: "blur(0px)",
           rotateX: 0,
           duration: 0.9,
           stagger: 0.1,
