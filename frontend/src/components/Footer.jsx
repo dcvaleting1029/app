@@ -28,7 +28,7 @@ export default function Footer() {
           <div className="col-span-2 lg:col-span-4">
             <div className="flex items-center gap-3">
               <img
-                src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/40jiimj9_WhatsApp%20Image%202026-05-27%20at%2023.01.29%20%281%29.jpeg"
+                src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/c0p2224e_JA%20%2840%20x%2040%20px%29%20%2821%29.png"
                 alt="DC Valeting"
                 className="h-14 w-14 object-contain rounded-md"
               />

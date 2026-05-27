@@ -35,7 +35,7 @@ export default function Navbar({ onBook }) {
           {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group" data-testid="logo">
             <img
-              src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/40jiimj9_WhatsApp%20Image%202026-05-27%20at%2023.01.29%20%281%29.jpeg"
+              src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/c0p2224e_JA%20%2840%20x%2040%20px%29%20%2821%29.png"
               alt="DC Valeting"
               className="h-12 w-12 lg:h-14 lg:w-14 object-contain rounded-md"
               style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.08))" }}
