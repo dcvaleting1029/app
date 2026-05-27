@@ -35,12 +35,11 @@ export default function Hero({ onBook, bookingRef }) {
       // Initial state for words
       gsap.set(wordsRef.current, {
         yPercent: 26,
-        opacity: 0.35,
         scale: 1.08,
         letterSpacing: "-0.04em",
         transformPerspective: 900,
         rotateX: 6,
-        willChange: "transform, opacity",
+        willChange: "transform",
       });
 
       gsap.set(subtitleRef.current, { y: 20, opacity: 0 });
@@ -71,7 +70,6 @@ export default function Hero({ onBook, bookingRef }) {
         wordsRef.current,
         {
           yPercent: 0,
-          opacity: 1,
           scale: 1,
           letterSpacing: "0.01em",
           rotateX: 0,
