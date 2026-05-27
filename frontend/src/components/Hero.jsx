@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Play } from "lucide-react";
 import BookingPanel from "./BookingPanel";
 
+const HERO_IMAGE =
+  "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/2a3pred6_PHOTO-2026-05-27-23-15-28.jpg";
+
 export default function Hero({ onBook, bookingRef }) {
   const [scrollY, setScrollY] = useState(0);
 
@@ -12,22 +15,75 @@ export default function Hero({ onBook, bookingRef }) {
   }, []);
 
   return (
-    <section id="home" className="relative overflow-hidden">
-      {/* Background ambient */}
+    <section id="home" className="relative overflow-hidden bg-[#050505]">
+      {/* Right-side full-bleed image (50% on desktop) */}
+      <div
+        className="absolute inset-y-0 right-0 w-full lg:w-1/2 pointer-events-none"
+        style={{
+          transform: `translateY(${scrollY * -0.06}px)`,
+          transition: "transform 0.1s linear",
+        }}
+      >
+        <img
+          src={HERO_IMAGE}
+          alt="DC Valeting — Land Rover Defender detailing"
+          className="w-full h-full object-cover object-center"
+        />
+        {/* Left-edge fade into pure black for seamless blend with text side */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, #050505 0%, rgba(5,5,5,0.85) 18%, rgba(5,5,5,0.35) 42%, rgba(5,5,5,0) 70%)",
+          }}
+        />
+        {/* Top + bottom vignette for cinematic depth */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(5,5,5,0.45) 0%, rgba(5,5,5,0) 25%, rgba(5,5,5,0) 70%, rgba(5,5,5,0.7) 100%)",
+          }}
+        />
+        {/* Mobile: stronger overall darkening so text remains readable */}
+        <div className="absolute inset-0 lg:hidden bg-black/55" />
+      </div>
+
+      {/* Ambient glows */}
       <div className="absolute inset-0 pointer-events-none">
         <div
-          className="absolute -top-40 -right-40 w-[800px] h-[800px] rounded-full"
+          className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%)",
           }}
         />
         <div
-          className="absolute -bottom-40 -left-40 w-[700px] h-[700px] rounded-full"
+          className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)",
           }}
+        />
+      </div>
+
+      {/* Floating particles overlay (front of image) */}
+      <div className="absolute inset-0 pointer-events-none">
+        <span
+          className="particle w-2 h-2"
+          style={{ top: "22%", left: "62%", animation: "floatA 9s ease-in-out infinite" }}
+        />
+        <span
+          className="particle w-1.5 h-1.5"
+          style={{ top: "65%", left: "78%", animation: "floatB 11s ease-in-out infinite" }}
+        />
+        <span
+          className="particle w-1 h-1"
+          style={{ top: "40%", left: "92%", animation: "floatC 13s ease-in-out infinite" }}
+        />
+        <span
+          className="particle w-2.5 h-2.5"
+          style={{ top: "55%", left: "55%", animation: "floatA 14s ease-in-out infinite 1s" }}
         />
       </div>
 
@@ -91,83 +147,11 @@ export default function Hero({ onBook, bookingRef }) {
           </div>
         </div>
 
-        {/* Right: Car + booking */}
+        {/* Right: floating booking panel */}
         <div className="lg:col-span-6 relative">
-          {/* Car image */}
-          <div
-            className="relative rounded-2xl overflow-hidden silver-border"
-            style={{
-              transform: `translateY(${scrollY * -0.08}px)`,
-              transition: "transform 0.1s linear",
-            }}
-          >
-            <div className="aspect-[4/5] lg:aspect-[5/6] relative bg-black">
-              <img
-                src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1400&q=80&auto=format&fit=crop"
-                alt="Glossy black performance car"
-                className="w-full h-full object-cover opacity-95"
-                onError={(e) => {
-                  e.currentTarget.src =
-                    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=80";
-                }}
-              />
-              <div className="car-spotlight" />
-              <div className="reflective-floor" />
-
-              {/* Floating particles */}
-              <span
-                className="particle w-2 h-2"
-                style={{ top: "20%", left: "30%", animation: "floatA 9s ease-in-out infinite" }}
-              />
-              <span
-                className="particle w-1.5 h-1.5"
-                style={{ top: "65%", left: "70%", animation: "floatB 11s ease-in-out infinite" }}
-              />
-              <span
-                className="particle w-1 h-1"
-                style={{ top: "40%", left: "85%", animation: "floatC 13s ease-in-out infinite" }}
-              />
-              <span
-                className="particle w-2.5 h-2.5"
-                style={{ top: "55%", left: "15%", animation: "floatA 14s ease-in-out infinite 1s" }}
-              />
-              <span
-                className="particle w-1 h-1"
-                style={{ top: "15%", left: "75%", animation: "floatC 10s ease-in-out infinite 2s" }}
-              />
-
-              {/* Top right floating tag */}
-              <div className="absolute top-5 right-5 glass-strong rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-white/85">
-                  Available this week
-                </span>
-              </div>
-
-              {/* Bottom rating card */}
-              <div className="absolute bottom-5 left-5 glass-strong rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="w-7 h-7 rounded-full border border-white/20 bg-gradient-to-br from-white/20 to-white/5"
-                    />
-                  ))}
-                </div>
-                <div className="leading-tight">
-                  <div className="text-[11px] text-white">★ 5.0 / 5.0</div>
-                  <div className="text-[9px] uppercase tracking-[0.18em] text-white/55">
-                    240+ reviews
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating booking panel (desktop only) */}
           <div
             ref={bookingRef}
-            className="hidden lg:block absolute -right-4 xl:-right-8 top-1/2 -translate-y-1/2 w-[380px] xl:w-[400px] z-20"
+            className="hidden lg:block lg:ml-auto w-full max-w-[400px] relative z-20"
           >
             <BookingPanel />
           </div>
