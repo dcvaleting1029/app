@@ -305,7 +305,11 @@ body {
 .marquee-track {
     display: flex;
     width: max-content;
-    animation: marquee 40s linear infinite;
+    animation: marquee 32s linear infinite;
+    will-change: transform;
+}
+.marquee-track:hover {
+    animation-play-state: paused;
 }
 
 /* Cinematic one-time metallic shine sweep on page load */

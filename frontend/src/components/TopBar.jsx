@@ -7,21 +7,42 @@ const items = [
   { icon: MapPin, label: "Edinburgh & Surrounding Areas" },
 ];
 
+function MarqueeRow() {
+  return (
+    <div className="flex items-center shrink-0">
+      {items.map((it, i) => {
+        const Icon = it.icon;
+        return (
+          <div key={`${it.label}-${i}`} className="flex items-center gap-3 whitespace-nowrap px-8">
+            <Icon size={13} className="text-white/80" strokeWidth={1.5} />
+            <span className="text-[11px] uppercase tracking-[0.22em] text-white/75">
+              {it.label}
+            </span>
+            <span className="ml-8 w-1 h-1 rounded-full bg-white/30" />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function TopBar() {
   return (
     <div
       data-testid="top-bar"
-      className="relative z-30 w-full bg-black border-b border-white/10"
+      className="relative z-30 w-full bg-black border-b border-white/10 overflow-hidden"
     >
-      <div className="mx-auto max-w-[1480px] px-6">
-        <div className="flex items-center justify-center gap-6 py-2 text-[11px] uppercase tracking-[0.18em] text-white/70 overflow-x-auto no-scrollbar">
-          {items.map(({ icon: Icon, label }, i) => (
-            <div key={label} className="flex items-center gap-3 whitespace-nowrap">
-              <Icon size={13} className="text-white/80" strokeWidth={1.5} />
-              <span>{label}</span>
-              {i < items.length - 1 && <div className="divider-vert ml-3" />}
-            </div>
-          ))}
+      {/* Edge fades */}
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-black to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-black to-transparent" />
+
+      <div className="py-2.5">
+        <div className="marquee-track">
+          {/* duplicate twice for seamless loop */}
+          <MarqueeRow />
+          <MarqueeRow />
+          <MarqueeRow />
+          <MarqueeRow />
         </div>
       </div>
     </div>
