@@ -102,8 +102,8 @@ export default function Hero({ onBook, bookingRef }) {
             data-testid="hero-headline"
             className="font-display text-white text-[64px] sm:text-[84px] lg:text-[112px] leading-[0.92] tracking-[0.01em]"
           >
-            <span className="block silver-text">PROFESSIONAL CARE.</span>
-            <span className="block silver-text">PREMIUM RESULTS.</span>
+            <span className="block silver-text">Professional care.</span>
+            <span className="block silver-text">Premium Results.</span>
           </h1>
 
           <p className="mt-7 text-white/65 text-base lg:text-lg max-w-xl leading-relaxed">
