@@ -15,7 +15,11 @@ export default function Hero({ onBook, bookingRef }) {
   }, []);
 
   return (
-    <section id="home" className="relative overflow-hidden bg-[#050505]">
+    <section id="home" className="relative overflow-hidden bg-[#050505] hero-fade-in">
+      {/* One-time cinematic metallic shine sweep on page load */}
+      <div className="hero-shine-ripple" aria-hidden />
+      <div className="hero-shine-overlay" aria-hidden />
+
       {/* Right-side full-bleed image (50% on desktop) */}
       <div
         className="absolute inset-y-0 right-0 w-full lg:w-1/2 pointer-events-none"
@@ -86,7 +90,7 @@ export default function Hero({ onBook, bookingRef }) {
 
       <div className="relative mx-auto max-w-[1480px] px-6 pt-40 lg:pt-52 pb-24 lg:pb-32 grid lg:grid-cols-12 gap-10 items-center min-h-[88vh]">
         {/* Left content */}
-        <div className="lg:col-span-6 relative z-10">
+        <div className="lg:col-span-6 relative z-10 hero-content-in">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full silver-border bg-white/[0.02] mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             <span className="text-[10px] uppercase tracking-[0.3em] text-white/75">
@@ -109,7 +113,7 @@ export default function Hero({ onBook, bookingRef }) {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <button data-testid="hero-book-cta" onClick={onBook} className="btn-primary">
+            <button data-testid="hero-book-cta" onClick={onBook} className="btn-primary cta-breath">
               BOOK YOUR VALET
               <ArrowRight size={16} />
             </button>
