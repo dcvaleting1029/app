@@ -2,44 +2,34 @@ import useReveal from "../hooks/useReveal";
 
 const IMAGES = [
   {
-    src: "https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=900&q=80&auto=format&fit=crop",
+    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/8uadvz76_PHOTO-2026-05-27-23-15-23%20%284%29.jpg",
     h: "tall",
-    label: "Foam Wash",
+    label: "Porsche Cayenne — Interior Detail",
+    tag: "Full Interior Valet",
   },
   {
-    src: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=900&q=80&auto=format&fit=crop",
-    h: "short",
-    label: "Paint Correction",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=900&q=80&auto=format&fit=crop",
+    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/kamnoibu_PHOTO-2026-05-27-23-15-23%20%285%29.jpg",
     h: "med",
-    label: "Ceramic Finish",
+    label: "Cayenne Boot Deep Clean",
+    tag: "Vacuum & Shampoo",
   },
   {
-    src: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=900&q=80&auto=format&fit=crop",
-    h: "med",
-    label: "Interior Detail",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=900&q=80&auto=format&fit=crop",
+    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/4wl0ixnh_PHOTO-2026-05-27-23-15-24%20%281%29.jpg",
     h: "tall",
-    label: "Showroom Gloss",
+    label: "Porsche — Cabin Protection",
+    tag: "Steering Wrap & Detail",
   },
   {
-    src: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=900&q=80&auto=format&fit=crop",
-    h: "short",
-    label: "Performance",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=900&q=80&auto=format&fit=crop",
+    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/scczsqc1_PHOTO-2026-05-27-23-15-23%20%286%29.jpg",
     h: "med",
-    label: "SUV Detail",
+    label: "Ford Tourneo — Foam Wash",
+    tag: "Exterior Maintenance",
   },
   {
-    src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&q=80&auto=format&fit=crop",
+    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/0a0bnzcz_PHOTO-2026-05-27-23-15-24%20%282%29.jpg",
     h: "tall",
-    label: "Mirror Finish",
+    label: "Cayenne Rear — Snow Foam",
+    tag: "Safe Wash Process",
   },
 ];
 
@@ -74,7 +64,7 @@ export default function Gallery() {
 
         <div
           ref={ref}
-          className="reveal stagger columns-1 sm:columns-2 lg:columns-4 gap-4 lg:gap-5 [column-fill:_balance]"
+          className="reveal stagger columns-1 sm:columns-2 lg:columns-3 gap-4 lg:gap-5 [column-fill:_balance]"
         >
           {IMAGES.map((img, i) => (
             <div
@@ -88,12 +78,12 @@ export default function Gallery() {
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute bottom-5 left-5 right-5 opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500">
                 <div className="text-[10px] uppercase tracking-[0.24em] text-white/70">
-                  Recent work
+                  {img.tag}
                 </div>
-                <div className="font-display text-white text-xl tracking-[0.04em]">
+                <div className="font-display text-white text-xl tracking-[0.04em] mt-1">
                   {img.label.toUpperCase()}
                 </div>
               </div>
