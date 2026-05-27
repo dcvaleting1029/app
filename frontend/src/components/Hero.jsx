@@ -15,6 +15,9 @@ const LINE_2 = ["PREMIUM", "RESULTS."];
 export default function Hero({ onBook, bookingRef }) {
   const sectionRef = useRef(null);
   const imageRef = useRef(null);
+  const imageWrapRef = useRef(null);
+  const bookingWrapRef = useRef(null);
+  const statsRef = useRef(null);
   const shineRef = useRef(null);
   const dustRef = useRef(null);
   const ctaRef = useRef(null);
@@ -46,6 +49,23 @@ export default function Hero({ onBook, bookingRef }) {
       gsap.set(paragraphRef.current, { y: 30, opacity: 0 });
       gsap.set(ctaRef.current, { y: 30, opacity: 0 });
       gsap.set(shineRef.current, { xPercent: -120, opacity: 0 });
+
+      // Right-side reveal: image wrap + booking panel come alive in sync
+      gsap.set(imageWrapRef.current, {
+        scale: 1.12,
+        xPercent: 6,
+        transformPerspective: 1000,
+        rotateY: -3,
+        willChange: "transform",
+      });
+      gsap.set(bookingWrapRef.current, {
+        y: 60,
+        scale: 0.96,
+        transformPerspective: 1000,
+        rotateY: 4,
+        willChange: "transform",
+      });
+      gsap.set(statsRef.current, { y: 24 });
 
       // Scrub timeline tied to scroll
       const tl = gsap.timeline({
@@ -106,20 +126,47 @@ export default function Hero({ onBook, bookingRef }) {
         { y: 0, opacity: 1, duration: 0.6 },
         0.7
       );
+      tl.to(
+        statsRef.current,
+        { y: 0, duration: 0.6 },
+        0.75
+      );
 
-      // Image parallax + zoom (separate ScrollTrigger for true parallax decoupling)
+      // Right side reveal — image + booking panel animate in sync with text
+      tl.to(
+        imageWrapRef.current,
+        {
+          scale: 1,
+          xPercent: 0,
+          rotateY: 0,
+          duration: 1.1,
+        },
+        0
+      );
+      tl.to(
+        bookingWrapRef.current,
+        {
+          y: 0,
+          scale: 1,
+          rotateY: 0,
+          duration: 1.0,
+        },
+        0.25
+      );
+
+      // Continuous parallax: image keeps zooming gently as user scrolls past
       if (imageRef.current) {
         gsap.fromTo(
           imageRef.current,
           { scale: 1.0, yPercent: 0 },
           {
-            scale: 1.08,
-            yPercent: -6,
+            scale: 1.12,
+            yPercent: -10,
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top top",
-              end: "+=800",
+              end: "+=900",
               scrub: 1.2,
             },
           }
@@ -194,7 +241,7 @@ export default function Hero({ onBook, bookingRef }) {
       className="relative overflow-hidden bg-[#050505] min-h-screen"
     >
       {/* Right-side full-bleed image (50% on desktop) */}
-      <div className="absolute inset-y-0 right-0 w-full lg:w-1/2 pointer-events-none">
+      <div ref={imageWrapRef} className="absolute inset-y-0 right-0 w-full lg:w-1/2 pointer-events-none">
         <div ref={imageRef} className="absolute inset-0 will-change-transform">
           <img
             src={HERO_IMAGE}
@@ -400,7 +447,7 @@ export default function Hero({ onBook, bookingRef }) {
           </div>
 
           {/* Trust strip */}
-          <div className="mt-12 grid grid-cols-3 gap-6 max-w-md">
+          <div ref={statsRef} className="mt-12 grid grid-cols-3 gap-6 max-w-md will-change-transform">
             <div>
               <div className="font-display text-3xl text-white">8+</div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-white/50 mt-1">
@@ -425,8 +472,11 @@ export default function Hero({ onBook, bookingRef }) {
         {/* Right: floating booking panel */}
         <div className="lg:col-span-6 relative">
           <div
-            ref={bookingRef}
-            className="hidden lg:block lg:ml-auto w-full max-w-[400px] relative z-20 mt-[280px] xl:mt-[340px]"
+            ref={(node) => {
+              bookingWrapRef.current = node;
+              if (bookingRef) bookingRef.current = node;
+            }}
+            className="hidden lg:block lg:ml-auto w-full max-w-[400px] relative z-20 mt-[280px] xl:mt-[340px] will-change-transform"
           >
             <BookingPanel />
           </div>
