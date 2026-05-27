@@ -147,11 +147,11 @@ export default function Hero({ onBook, bookingRef }) {
           </div>
         </div>
 
-        {/* Right: floating booking panel */}
+        {/* Right: floating booking panel (pushed lower to reveal image) */}
         <div className="lg:col-span-6 relative">
           <div
             ref={bookingRef}
-            className="hidden lg:block lg:ml-auto w-full max-w-[400px] relative z-20"
+            className="hidden lg:block lg:ml-auto w-full max-w-[400px] relative z-20 mt-[280px] xl:mt-[340px]"
           >
             <BookingPanel />
           </div>

@@ -6,9 +6,7 @@ const links = [
   { label: "Services", href: "#services" },
   { label: "Packages", href: "#packages" },
   { label: "Gallery", href: "#gallery" },
-  { label: "Reviews", href: "#reviews" },
   { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
 ];
 
 export default function Navbar({ onBook }) {
@@ -24,11 +22,7 @@ export default function Navbar({ onBook }) {
   return (
     <header
       data-testid="navbar"
-      className={`sticky top-0 z-40 transition-all duration-500 ${
-        scrolled
-          ? "bg-black/85 backdrop-blur-xl border-b border-white/10"
-          : "bg-transparent border-b border-transparent"
-      }`}
+      className="sticky top-0 z-40 bg-transparent"
     >
       <div className="mx-auto max-w-[1480px] px-6">
         <div className="flex items-center justify-between h-[72px]">
