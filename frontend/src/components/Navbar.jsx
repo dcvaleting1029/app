@@ -37,17 +37,9 @@ export default function Navbar({ onBook }) {
             <img
               src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/c0p2224e_JA%20%2840%20x%2040%20px%29%20%2821%29.png"
               alt="DC Valeting"
-              className="h-12 w-12 lg:h-14 lg:w-14 object-contain rounded-md"
-              style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.08))" }}
+              className="h-14 w-14 lg:h-16 lg:w-16 object-contain"
+              style={{ filter: "drop-shadow(0 0 14px rgba(255,255,255,0.1))" }}
             />
-            <div className="hidden sm:flex flex-col leading-none">
-              <span className="font-display text-white text-[18px] tracking-[0.18em]">
-                DC VALETING
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.35em] text-white/45 mt-1">
-                Edinburgh
-              </span>
-            </div>
           </a>
 
           {/* Center links */}

@@ -30,16 +30,8 @@ export default function Footer() {
               <img
                 src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/c0p2224e_JA%20%2840%20x%2040%20px%29%20%2821%29.png"
                 alt="DC Valeting"
-                className="h-14 w-14 object-contain rounded-md"
+                className="h-20 w-20 object-contain"
               />
-              <div className="flex flex-col leading-none">
-                <span className="font-display text-white text-[20px] tracking-[0.16em]">
-                  DC VALETING
-                </span>
-                <span className="text-[9px] uppercase tracking-[0.35em] text-white/45 mt-1">
-                  Edinburgh
-                </span>
-              </div>
             </div>
             <p className="mt-5 text-white/55 text-sm leading-relaxed max-w-sm">
               Professional valeting, detailing & paint correction services in
