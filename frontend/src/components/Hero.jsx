@@ -87,7 +87,7 @@ export default function Hero({ onBook, bookingRef }) {
         />
       </div>
 
-      <div className="relative mx-auto max-w-[1480px] px-6 pt-16 lg:pt-20 pb-24 lg:pb-32 grid lg:grid-cols-12 gap-10 items-center min-h-[88vh]">
+      <div className="relative mx-auto max-w-[1480px] px-6 pt-40 lg:pt-52 pb-24 lg:pb-32 grid lg:grid-cols-12 gap-10 items-center min-h-[88vh]">
         {/* Left content */}
         <div className="lg:col-span-6 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full silver-border bg-white/[0.02] mb-8">
