@@ -25,7 +25,8 @@ export default function Landing() {
   };
 
   useEffect(() => {
-    document.title = "DC Valeting — Premium Detailing & Ceramic Coatings | Edinburgh";
+    document.title =
+      "Car Detailing & Valeting Edinburgh | Ceramic Coating Specialists | DC Valeting";
   }, []);
 
   return (
