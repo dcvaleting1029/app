@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -11,9 +11,10 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+from email_service import send_booking_received, send_booking_confirmed  # noqa: E402
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -96,11 +97,13 @@ async def get_status_checks():
 
 
 @api_router.post("/bookings", response_model=Booking)
-async def create_booking(payload: BookingCreate):
+async def create_booking(payload: BookingCreate, background_tasks: BackgroundTasks):
     booking = Booking(**payload.model_dump())
     doc = booking.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.bookings.insert_one(doc)
+    # Send emails in background so the response stays fast
+    background_tasks.add_task(send_booking_received, doc)
     return booking
 
 
@@ -174,17 +177,25 @@ async def admin_list_bookings(_: bool = Depends(require_admin)):
 
 @api_router.patch("/admin/bookings/{booking_id}", response_model=Booking)
 async def admin_update_booking_status(
-    booking_id: str, payload: StatusUpdate, _: bool = Depends(require_admin)
+    booking_id: str,
+    payload: StatusUpdate,
+    background_tasks: BackgroundTasks,
+    _: bool = Depends(require_admin),
 ):
     allowed = {"pending", "confirmed", "completed", "cancelled"}
     if payload.status not in allowed:
         raise HTTPException(status_code=400, detail="Invalid status")
-    res = await db.bookings.update_one(
+    # fetch previous to detect transition
+    prev = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not prev:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    await db.bookings.update_one(
         {"id": booking_id}, {"$set": {"status": payload.status}}
     )
-    if res.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Booking not found")
     doc = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    # Fire confirmation email only when transitioning into "confirmed"
+    if payload.status == "confirmed" and (prev.get("status") or "pending") != "confirmed":
+        background_tasks.add_task(send_booking_confirmed, doc)
     if isinstance(doc.get('created_at'), str):
         try:
             doc['created_at'] = datetime.fromisoformat(doc['created_at'])
