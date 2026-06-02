@@ -1,9 +1,10 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import secrets
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
@@ -126,6 +127,88 @@ async def get_booking(booking_id: str):
         except Exception:
             doc['created_at'] = datetime.now(timezone.utc)
     return doc
+
+
+# =============================
+# Admin
+# =============================
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+
+class AdminLogin(BaseModel):
+    password: str
+
+
+class StatusUpdate(BaseModel):
+    status: str  # pending | confirmed | completed | cancelled
+
+
+def require_admin(x_admin_password: Optional[str] = Header(default=None)):
+    if not ADMIN_PASSWORD:
+        raise HTTPException(status_code=500, detail="Admin password not configured")
+    if not x_admin_password or not secrets.compare_digest(x_admin_password, ADMIN_PASSWORD):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return True
+
+
+@api_router.post("/admin/login")
+async def admin_login(payload: AdminLogin):
+    if not ADMIN_PASSWORD:
+        raise HTTPException(status_code=500, detail="Admin password not configured")
+    if not secrets.compare_digest(payload.password, ADMIN_PASSWORD):
+        raise HTTPException(status_code=401, detail="Invalid password")
+    return {"ok": True}
+
+
+@api_router.get("/admin/bookings", response_model=List[Booking])
+async def admin_list_bookings(_: bool = Depends(require_admin)):
+    bookings = await db.bookings.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    for b in bookings:
+        if isinstance(b.get('created_at'), str):
+            try:
+                b['created_at'] = datetime.fromisoformat(b['created_at'])
+            except Exception:
+                b['created_at'] = datetime.now(timezone.utc)
+    return bookings
+
+
+@api_router.patch("/admin/bookings/{booking_id}", response_model=Booking)
+async def admin_update_booking_status(
+    booking_id: str, payload: StatusUpdate, _: bool = Depends(require_admin)
+):
+    allowed = {"pending", "confirmed", "completed", "cancelled"}
+    if payload.status not in allowed:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    res = await db.bookings.update_one(
+        {"id": booking_id}, {"$set": {"status": payload.status}}
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    doc = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if isinstance(doc.get('created_at'), str):
+        try:
+            doc['created_at'] = datetime.fromisoformat(doc['created_at'])
+        except Exception:
+            doc['created_at'] = datetime.now(timezone.utc)
+    return doc
+
+
+@api_router.delete("/admin/bookings/{booking_id}")
+async def admin_delete_booking(booking_id: str, _: bool = Depends(require_admin)):
+    res = await db.bookings.delete_one({"id": booking_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    return {"ok": True}
+
+
+@api_router.get("/admin/stats")
+async def admin_stats(_: bool = Depends(require_admin)):
+    pipeline = [{"$group": {"_id": "$status", "count": {"$sum": 1}}}]
+    by_status = {}
+    async for row in db.bookings.aggregate(pipeline):
+        by_status[row["_id"] or "pending"] = row["count"]
+    total = await db.bookings.count_documents({})
+    return {"total": total, "by_status": by_status}
 
 
 # Include the router in the main app
