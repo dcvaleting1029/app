@@ -85,18 +85,18 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-white/75">
               <li className="flex items-start gap-2">
                 <Phone size={14} className="mt-0.5 text-white/60" strokeWidth={1.5} />
-                <a href="tel:07949123456" className="hover:text-white" data-testid="footer-phone">
-                  07949 123 456
+                <a href="tel:07983668046" className="hover:text-white" data-testid="footer-phone">
+                  07983 668 046
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <Mail size={14} className="mt-0.5 text-white/60" strokeWidth={1.5} />
                 <a
-                  href="mailto:dcvaleting@outlook.com"
+                  href="mailto:dcvaleting17@gmail.com"
                   className="hover:text-white break-all"
                   data-testid="footer-email"
                 >
-                  dcvaleting@outlook.com
+                  dcvaleting17@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-2">

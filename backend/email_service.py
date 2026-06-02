@@ -80,7 +80,7 @@ def _layout(title: str, intro: str, booking: dict, footer_note: str = "") -> str
                 <tr>
                   <td style="padding-top:24px;border-top:1px solid {BRAND_BORDER};color:{BRAND_MUTED};font-size:12px;line-height:1.6;">
                     <strong style="color:#ffffff;">DC Valeting</strong> · Edinburgh & Surrounding Areas<br>
-                    07949 123 456 · dcvaleting@outlook.com
+                    07983 668 046 · dcvaleting17@gmail.com
                   </td>
                 </tr>
               </table>
