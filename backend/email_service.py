@@ -128,7 +128,7 @@ def _booking_completed_html(booking: dict) -> str:
         title="Thank you",
         intro=f"Hi {booking.get('name', 'there')}, thanks for choosing DC Valeting. Your appointment is now complete and we hope you're delighted with the finish. If you have a moment, we'd love a quick review — it really helps small detailing businesses like ours.",
         booking=booking,
-        footer_note="Leave us a review on Google: https://g.page/r/dcvaleting · Thanks again from the DC Valeting team.",
+        footer_note="Leave us a review on Google: https://g.page/r/CQR0OZkK3r4AEAE/review · Thanks again from the DC Valeting team.",
     )
 
 
