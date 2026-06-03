@@ -114,6 +114,24 @@ def _booking_confirmed_html(booking: dict) -> str:
     )
 
 
+def _booking_cancelled_html(booking: dict) -> str:
+    return _layout(
+        title="Booking cancelled",
+        intro=f"Hi {booking.get('name', 'there')}, your DC Valeting booking has been cancelled. If this was a mistake or you'd like to rebook, just reply to this email or give us a call — we'd love to take care of your vehicle.",
+        booking=booking,
+        footer_note="Hope to see you again soon.",
+    )
+
+
+def _booking_completed_html(booking: dict) -> str:
+    return _layout(
+        title="Thank you",
+        intro=f"Hi {booking.get('name', 'there')}, thanks for choosing DC Valeting. Your appointment is now complete and we hope you're delighted with the finish. If you have a moment, we'd love a quick review — it really helps small detailing businesses like ours.",
+        booking=booking,
+        footer_note="Leave us a review on Google: https://g.page/r/dcvaleting · Thanks again from the DC Valeting team.",
+    )
+
+
 def _business_new_booking_html(booking: dict) -> str:
     return _layout(
         title="New booking received",
@@ -179,4 +197,30 @@ async def send_booking_confirmed(booking: dict) -> None:
         [customer_email],
         "Your DC Valeting appointment is confirmed",
         _booking_confirmed_html(booking),
+    )
+
+
+async def send_booking_cancelled(booking: dict) -> None:
+    """Customer email when booking is cancelled."""
+    customer_email = booking.get("email")
+    if not customer_email:
+        return
+    await asyncio.to_thread(
+        _send,
+        [customer_email],
+        "Your DC Valeting booking has been cancelled",
+        _booking_cancelled_html(booking),
+    )
+
+
+async def send_booking_completed(booking: dict) -> None:
+    """Customer email when booking is marked completed (thank-you + review request)."""
+    customer_email = booking.get("email")
+    if not customer_email:
+        return
+    await asyncio.to_thread(
+        _send,
+        [customer_email],
+        "Thanks for choosing DC Valeting",
+        _booking_completed_html(booking),
     )

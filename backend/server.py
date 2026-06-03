@@ -14,7 +14,12 @@ from datetime import datetime, timezone
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-from email_service import send_booking_received, send_booking_confirmed  # noqa: E402
+from email_service import (  # noqa: E402
+    send_booking_received,
+    send_booking_confirmed,
+    send_booking_cancelled,
+    send_booking_completed,
+)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -193,9 +198,15 @@ async def admin_update_booking_status(
         {"id": booking_id}, {"$set": {"status": payload.status}}
     )
     doc = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
-    # Fire confirmation email only when transitioning into "confirmed"
-    if payload.status == "confirmed" and (prev.get("status") or "pending") != "confirmed":
-        background_tasks.add_task(send_booking_confirmed, doc)
+    prev_status = prev.get("status") or "pending"
+    # Fire transactional emails only on real status transitions
+    if payload.status != prev_status:
+        if payload.status == "confirmed":
+            background_tasks.add_task(send_booking_confirmed, doc)
+        elif payload.status == "cancelled":
+            background_tasks.add_task(send_booking_cancelled, doc)
+        elif payload.status == "completed":
+            background_tasks.add_task(send_booking_completed, doc)
     if isinstance(doc.get('created_at'), str):
         try:
             doc['created_at'] = datetime.fromisoformat(doc['created_at'])
