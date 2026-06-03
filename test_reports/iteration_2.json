@@ -1,0 +1,42 @@
+{
+  "summary": "Iteration 2 regression after adding admin dashboard + Resend email. Backend: 19/19 pytest cases pass (root, public bookings CRUD/validation, admin login/auth-guards, admin list/update/delete/stats). Frontend: full 4-step booking flow on desktop (1600x1000) submits successfully and shows 'BOOKING CONFIRMED'; validation guards on Steps 2 and 3 prevent advancing when data missing. Admin dashboard at /admin: login with password works, new booking appears in list with correct service/vehicle/date/time/name/email/phone, 'Mark confirmed' updates the status badge and removes that action button, search & confirmed filter both work. Backend persistence verified by querying GET /api/admin/bookings with X-Admin-Password header and matching the unique UI booking by email.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/bookings", "issue": "Returns 200 instead of 201 Created on successful creation (FastAPI default). Minor REST convention issue."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_bookings.py",
+    "/app/backend/tests/test_admin.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Optional: change POST /api/bookings to return 201 Created instead of 200 (low priority).",
+    "Optional: BookingPanel Step 1 defaults size to 'small' so the 'select vehicle size' validation can never trigger via the UI. If the requirement is that user must explicitly choose, initialise size as null and require selection; otherwise the current default + service default is fine.",
+    "Optional: BookingPanel uses date.toISOString().slice(0,10) which converts to UTC; for users in non-UTC timezones picking late-evening days this could submit the next day. Use a local-date format (YYYY-MM-DD via getFullYear/getMonth/getDate) to avoid off-by-one. (Same comment as iteration 1.)"
+  ],
+  "critical_code_review_comments": [
+    "server.py admin endpoints correctly use secrets.compare_digest (constant-time) and Header dependency — good security practice.",
+    "Admin.jsx persists the admin password in localStorage under 'dc_admin_pw' as plaintext. For a small private admin tool over HTTPS this is acceptable; for higher security move to a short-lived JWT/session cookie issued by /api/admin/login.",
+    "server.py still uses deprecated @app.on_event('shutdown'); migrate to FastAPI lifespan context (carry-over from iter 1).",
+    "Phone field has no regex validation on backend or frontend; consider Pydantic constr for E.164/GB format.",
+    "PATCH /api/admin/bookings/{id} returns 200 and updated booking — correct. 400 for invalid status and 404 for missing id verified.",
+    "Email send is correctly off-loaded to BackgroundTasks so the API response is not blocked by Resend latency — good."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin.py"
+  ],
+  "success_rate": {"backend": "100% (19/19)", "frontend": "100% (all critical flows incl. validation, persistence, admin status update)"},
+  "test_credentials": "Admin password: dcvaleting2025 (from /app/backend/.env ADMIN_PASSWORD).",
+  "seed_data_creation": "Created one UI booking TEST_UI_1780450318 / test_ui_1780450318@example.com (Full Valet, SUV/Large, 2026-06-03 10:00) now in 'confirmed' state. Pytest test_admin.py cleans up its own TEST_Admin_<ts> bookings via DELETE. Other TEST_* rows from iter 1 may still exist; safe to remove via DELETE /api/admin/bookings/{id}.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Tests live in /app/backend/tests/ — run with: pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml. Frontend booking panel renders inline in Hero at >=1024px (use viewport 1600x1000). Admin route is /admin, password 'dcvaleting2025'. Admin testids: admin-login-form, admin-password, admin-login-submit, admin-bookings-list, admin-search, admin-filter-{all|pending|confirmed|completed|cancelled}, admin-refresh, admin-logout, booking-row-{id}, status-btn-{id}-{status}, delete-btn-{id}. Backend admin requires header X-Admin-Password.",
+  "rca of the issue": "No bugs found in this iteration."
+}
