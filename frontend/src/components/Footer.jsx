@@ -109,7 +109,18 @@ export default function Footer() {
 
         <div className="mt-16 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.22em] text-white/45">
           <span>© 2025 DC Valeting. All rights reserved.</span>
-          <span>Made in Edinburgh</span>
+          <span>
+            Designed by{" "}
+            <a
+              href="https://jayalminshawi.com/lets-get-started"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="designer-credit"
+              className="text-white/70 hover:text-white transition underline-offset-4 hover:underline"
+            >
+              Jay Alminshawi
+            </a>
+          </span>
         </div>
       </div>
     </footer>
