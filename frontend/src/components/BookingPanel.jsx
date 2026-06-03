@@ -15,6 +15,17 @@ const SERVICES = [
   "Monthly Maintenance",
 ];
 
+const EXTRAS = [
+  { id: "engine-bay-clean", label: "Engine Bay Clean", price: "£30" },
+  { id: "pet-hair-removal", label: "Pet Hair Removal", price: "£15" },
+  { id: "ozone-odour", label: "Ozone Odour Treatment", price: "£40" },
+  { id: "seat-shampoo", label: "Seat Shampoo & Extraction", price: "£30" },
+  { id: "steam-clean", label: "Steam Clean", price: "£30" },
+  { id: "leather-conditioning", label: "Leather Seat Conditioning", price: "£40" },
+  { id: "ceramic-spray", label: "Ceramic Spray Sealant", price: "£20" },
+  { id: "mould-treatment", label: "Mould Treatment", price: "£50" },
+];
+
 const SIZES = [
   { id: "small", label: "Small / Medium" },
   { id: "suv", label: "SUV / Large" },
@@ -31,6 +42,8 @@ export default function BookingPanel({ onClose, mobile }) {
   const [step, setStep] = useState(0);
   const [service, setService] = useState(SERVICES[0]);
   const [size, setSize] = useState(SIZES[0].id);
+  const [extras, setExtras] = useState([]);
+  const [extrasOpen, setExtrasOpen] = useState(false);
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [name, setName] = useState("");
@@ -72,6 +85,7 @@ export default function BookingPanel({ onClose, mobile }) {
         phone,
         address,
         notes,
+        extras: extras.map((id) => EXTRAS.find((e) => e.id === id)?.label).filter(Boolean),
       };
       await axios.post(`${API}/bookings`, payload);
       toast.success("Booking confirmed — we'll be in touch shortly.");
@@ -150,6 +164,8 @@ export default function BookingPanel({ onClose, mobile }) {
                 setPhone("");
                 setAddress("");
                 setNotes("");
+                setExtras([]);
+                setExtrasOpen(false);
               }}
               className="btn-outline mt-5"
               data-testid="booking-new"
@@ -198,6 +214,74 @@ export default function BookingPanel({ onClose, mobile }) {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Optional extras dropdown */}
+                <div>
+                  <button
+                    type="button"
+                    data-testid="booking-extras-toggle"
+                    onClick={() => setExtrasOpen((o) => !o)}
+                    className="w-full flex items-center justify-between bg-black/60 border border-white/12 rounded-lg px-3 py-3 text-sm text-white hover:border-white/30 transition"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-[0.22em] text-white/55">
+                        Extras
+                      </span>
+                      <span className="text-[10px] text-white/40">(optional)</span>
+                      {extras.length > 0 && (
+                        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white text-black text-[10px] font-medium leading-none">
+                          {extras.length}
+                        </span>
+                      )}
+                    </span>
+                    <ChevronRight
+                      size={14}
+                      className={`transition-transform ${extrasOpen ? "rotate-90" : ""}`}
+                    />
+                  </button>
+                  {extrasOpen && (
+                    <div className="mt-2 border border-white/10 rounded-lg bg-black/40 max-h-[220px] overflow-y-auto">
+                      {EXTRAS.map((ex) => {
+                        const checked = extras.includes(ex.id);
+                        return (
+                          <label
+                            key={ex.id}
+                            data-testid={`extra-${ex.id}`}
+                            className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm border-b border-white/5 last:border-b-0 hover:bg-white/[0.04] cursor-pointer"
+                          >
+                            <span className="flex items-center gap-2.5 min-w-0">
+                              <span
+                                className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                                  checked
+                                    ? "bg-white border-white"
+                                    : "border-white/25 bg-black/30"
+                                }`}
+                              >
+                                {checked && (
+                                  <CheckCircle2 size={11} className="text-black" strokeWidth={3} />
+                                )}
+                              </span>
+                              <span className="text-white/85 truncate">{ex.label}</span>
+                            </span>
+                            <span className="text-white/55 text-[11px] shrink-0">{ex.price}</span>
+                            <input
+                              type="checkbox"
+                              className="sr-only"
+                              checked={checked}
+                              onChange={() => {
+                                setExtras((curr) =>
+                                  curr.includes(ex.id)
+                                    ? curr.filter((x) => x !== ex.id)
+                                    : [...curr, ex.id]
+                                );
+                              }}
+                            />
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -287,6 +371,15 @@ export default function BookingPanel({ onClose, mobile }) {
               <div className="space-y-2 text-sm">
                 <SummaryRow k="Service" v={service} />
                 <SummaryRow k="Vehicle" v={SIZES.find((s) => s.id === size).label} />
+                {extras.length > 0 && (
+                  <SummaryRow
+                    k="Extras"
+                    v={extras
+                      .map((id) => EXTRAS.find((e) => e.id === id)?.label)
+                      .filter(Boolean)
+                      .join(", ")}
+                  />
+                )}
                 <SummaryRow k="Date" v={date?.toDateString()} />
                 <SummaryRow k="Time" v={time} />
                 <SummaryRow k="Name" v={name} />

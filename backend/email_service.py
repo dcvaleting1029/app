@@ -29,6 +29,9 @@ def _layout(title: str, intro: str, booking: dict, footer_note: str = "") -> str
         ("Date", booking.get("date", "—")),
         ("Time", booking.get("time", "—")),
     ]
+    extras = booking.get("extras") or []
+    if extras:
+        rows.append(("Extras", ", ".join(extras)))
     if booking.get("address"):
         rows.append(("Address", booking["address"]))
     if booking.get("notes"):

@@ -57,6 +57,7 @@ class BookingCreate(BaseModel):
     phone: str
     address: Optional[str] = ""
     notes: Optional[str] = ""
+    extras: Optional[List[str]] = []
 
 
 class Booking(BaseModel):
@@ -71,6 +72,7 @@ class Booking(BaseModel):
     phone: str
     address: Optional[str] = ""
     notes: Optional[str] = ""
+    extras: Optional[List[str]] = []
     status: str = "pending"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

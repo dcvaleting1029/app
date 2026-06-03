@@ -386,6 +386,23 @@ function BookingCard({ booking, onStatus, onDelete, isUpdating }) {
         <Field icon={Clock} label="Time" value={booking.time} />
         <Field icon={Phone} label="Phone" value={booking.phone} href={`tel:${booking.phone}`} />
         <Field icon={Mail} label="Email" value={booking.email} href={`mailto:${booking.email}`} />
+        {booking.extras && booking.extras.length > 0 && (
+          <div className="col-span-2 lg:col-span-5">
+            <div className="text-[10px] uppercase tracking-[0.22em] text-white/40">
+              Extras
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {booking.extras.map((x) => (
+                <span
+                  key={x}
+                  className="text-[11px] px-2.5 py-1 rounded-full border border-white/15 bg-white/[0.04] text-white/85"
+                >
+                  {x}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
         {booking.address && <Field icon={MapPin} label="Address" value={booking.address} />}
         {booking.notes && (
           <div className="col-span-2 lg:col-span-3">

@@ -75,7 +75,7 @@ export default function Navbar({ onBook }) {
 
         {/* Mobile menu */}
         {open && (
-          <div className="lg:hidden pb-6 border-t border-white/10 pt-4">
+          <div className="lg:hidden -mx-6 mt-0 px-6 pb-6 pt-4 bg-black/90 backdrop-blur-xl border-t border-white/10 shadow-[0_18px_60px_rgba(0,0,0,0.6)]">
             <div className="flex flex-col gap-4">
               {links.map((l) => (
                 <a

@@ -3,8 +3,8 @@ import useReveal from "../hooks/useReveal";
 
 const ADDONS = [
   {
-    id: "1y",
-    title: "1 YEAR CERAMIC",
+    id: "2y",
+    title: "2 YEAR CERAMIC",
     desc: "Great entry-level protection with long-lasting hydrophobic effect and added gloss.",
     price: "Add £120–£180",
   },
