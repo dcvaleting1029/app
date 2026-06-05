@@ -29,7 +29,7 @@ export default function Navbar({ onBook }) {
           {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group" data-testid="logo">
             <img
-              src="https://dc-valeting.onrender.com/job_shine-next-level/artifacts/c0p2224e_JA%20%2840%20x%2040%20px%29%20%2821%29.png"
+              src="https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/c0p2224e_JA%20%2840%20x%2040%20px%29%20%2821%29.png"
               alt="DC Valeting"
               className="h-14 w-14 lg:h-16 lg:w-16 object-contain"
               style={{ filter: "drop-shadow(0 0 14px rgba(255,255,255,0.1))" }}
