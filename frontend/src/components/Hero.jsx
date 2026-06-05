@@ -3,7 +3,7 @@ import { ArrowRight, Play } from "lucide-react";
 import BookingPanel from "./BookingPanel";
 
 const HERO_IMAGE =
-  "https://dc-valeting.onrender.com/job_shine-next-level/artifacts/2a3pred6_PHOTO-2026-05-27-23-15-28.jpg";
+  "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/2a3pred6_PHOTO-2026-05-27-23-15-28.jpg";
 
 export default function Hero({ onBook, bookingRef }) {
   const [scrollY, setScrollY] = useState(0);
