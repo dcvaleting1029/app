@@ -2,31 +2,31 @@ import useReveal from "../hooks/useReveal";
 
 const IMAGES = [
   {
-    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/8uadvz76_PHOTO-2026-05-27-23-15-23%20%284%29.jpg",
+    src: "https://dc-valeting.onrender.com/job_shine-next-level/artifacts/8uadvz76_PHOTO-2026-05-27-23-15-23%20%284%29.jpg",
     h: "tall",
     label: "Porsche Cayenne — Interior Detail",
     tag: "Full Interior Valet",
   },
   {
-    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/kamnoibu_PHOTO-2026-05-27-23-15-23%20%285%29.jpg",
+    src: "https://dc-valeting.onrender.com/job_shine-next-level/artifacts/kamnoibu_PHOTO-2026-05-27-23-15-23%20%285%29.jpg",
     h: "med",
     label: "Cayenne Boot Deep Clean",
     tag: "Vacuum & Shampoo",
   },
   {
-    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/4wl0ixnh_PHOTO-2026-05-27-23-15-24%20%281%29.jpg",
+    src: "https://dc-valeting.onrender.com/job_shine-next-level/artifacts/4wl0ixnh_PHOTO-2026-05-27-23-15-24%20%281%29.jpg",
     h: "tall",
     label: "Porsche — Cabin Protection",
     tag: "Steering Wrap & Detail",
   },
   {
-    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/scczsqc1_PHOTO-2026-05-27-23-15-23%20%286%29.jpg",
+    src: "https://dc-valeting.onrender.com/job_shine-next-level/artifacts/scczsqc1_PHOTO-2026-05-27-23-15-23%20%286%29.jpg",
     h: "med",
     label: "Ford Tourneo — Foam Wash",
     tag: "Exterior Maintenance",
   },
   {
-    src: "https://customer-assets.emergentagent.com/job_shine-next-level/artifacts/0a0bnzcz_PHOTO-2026-05-27-23-15-24%20%282%29.jpg",
+    src: "https://dc-valeting.onrender.com/job_shine-next-level/artifacts/0a0bnzcz_PHOTO-2026-05-27-23-15-24%20%282%29.jpg",
     h: "tall",
     label: "Cayenne Rear — Snow Foam",
     tag: "Safe Wash Process",
