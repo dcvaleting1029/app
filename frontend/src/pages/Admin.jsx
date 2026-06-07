@@ -14,6 +14,8 @@ import {
   CircleAlert,
   Loader2,
   RefreshCw,
+  CalendarCheck,
+  Unlink,
 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -40,18 +42,27 @@ export default function Admin() {
 
   // verify saved pw on mount
   useEffect(() => {
-    if (!pw) {
-      setChecking(false);
-      return;
-    }
-    axios
-      .get(`${API}/admin/stats`, { headers: { "X-Admin-Password": pw } })
-      .then(() => setAuthed(true))
-      .catch(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!pw) {
+        if (!cancelled) setChecking(false);
+        return;
+      }
+      try {
+        await axios.get(`${API}/admin/stats`, { headers: { "X-Admin-Password": pw } });
+        if (!cancelled) setAuthed(true);
+      } catch {
+        if (cancelled) return;
         localStorage.removeItem(LS_KEY);
         setPw("");
-      })
-      .finally(() => setChecking(false));
+      } finally {
+        if (!cancelled) setChecking(false);
+      }
+    };
+    queueMicrotask(run);
+    return () => {
+      cancelled = true;
+    };
   }, [pw]);
 
   const login = async (e) => {
@@ -136,6 +147,8 @@ function Dashboard({ pw, onLogout }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState(null);
+  const [google, setGoogle] = useState({ configured: false, connected: false, email: null });
+  const [gBusy, setGBusy] = useState(false);
 
   const headers = useMemo(() => ({ "X-Admin-Password": pw }), [pw]);
 
@@ -151,10 +164,56 @@ function Dashboard({ pw, onLogout }) {
     }
   };
 
+  const fetchGoogle = async () => {
+    try {
+      const { data } = await axios.get(`${API}/admin/google/status`, { headers });
+      setGoogle(data);
+    } catch {
+      /* silently ignore — not critical */
+    }
+  };
+
   useEffect(() => {
-    fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    queueMicrotask(() => {
+      fetchAll();
+      fetchGoogle();
+      // Handle OAuth redirect feedback (?google=connected or ?google=error)
+      const params = new URLSearchParams(window.location.search);
+      const g = params.get("google");
+      if (g === "connected") {
+        toast.success("Google Calendar connected");
+        window.history.replaceState({}, "", "/admin");
+      } else if (g === "error") {
+        toast.error(`Google Calendar connection failed: ${params.get("reason") || "unknown"}`);
+        window.history.replaceState({}, "", "/admin");
+      }
+    });
   }, []);
+
+  const connectGoogle = async () => {
+    setGBusy(true);
+    try {
+      const { data } = await axios.get(`${API}/admin/google/auth-url`, { headers });
+      window.location.href = data.url;
+    } catch {
+      toast.error("Could not start Google sign-in");
+      setGBusy(false);
+    }
+  };
+
+  const disconnectGoogle = async () => {
+    if (!window.confirm("Disconnect Google Calendar? New bookings will no longer be added to your calendar.")) return;
+    setGBusy(true);
+    try {
+      await axios.post(`${API}/admin/google/disconnect`, {}, { headers });
+      toast.success("Disconnected");
+      setGoogle({ ...google, connected: false, email: null });
+    } catch {
+      toast.error("Disconnect failed");
+    } finally {
+      setGBusy(false);
+    }
+  };
 
   const updateStatus = async (id, status) => {
     setUpdatingId(id);
@@ -237,6 +296,57 @@ function Dashboard({ pw, onLogout }) {
       </header>
 
       <main className="max-w-[1480px] mx-auto px-6 py-10">
+        {/* Google Calendar connection card */}
+        {google.configured && (
+          <div
+            data-testid="google-card"
+            className="mb-6 p-5 rounded-2xl silver-border bg-gradient-to-r from-white/[0.04] to-transparent flex flex-wrap items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl border border-white/15 bg-white/[0.04] flex items-center justify-center">
+                <CalendarCheck size={20} className={google.connected ? "text-emerald-300" : "text-white/60"} strokeWidth={1.4} />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.24em] text-white/45">
+                  Google Calendar
+                </div>
+                <div className="font-display text-white text-xl mt-1 tracking-[0.03em]">
+                  {google.connected ? "CONNECTED" : "NOT CONNECTED"}
+                </div>
+                {google.connected && google.email && (
+                  <div className="text-xs text-white/55 mt-0.5">{google.email}</div>
+                )}
+                {!google.connected && (
+                  <div className="text-xs text-white/55 mt-0.5">
+                    Auto-create calendar events for every new booking.
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              {google.connected ? (
+                <button
+                  data-testid="google-disconnect"
+                  onClick={disconnectGoogle}
+                  disabled={gBusy}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/12 hover:border-rose-400/40 hover:bg-rose-500/10 text-xs uppercase tracking-[0.18em] text-white/85 transition disabled:opacity-50"
+                >
+                  <Unlink size={13} /> Disconnect
+                </button>
+              ) : (
+                <button
+                  data-testid="google-connect"
+                  onClick={connectGoogle}
+                  disabled={gBusy}
+                  className="btn-primary disabled:opacity-60"
+                >
+                  CONNECT GOOGLE CALENDAR
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
           <StatCard label="Total" value={stats.total} accent="white" />

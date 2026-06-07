@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, BackgroundTasks
+from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -20,6 +21,7 @@ from email_service import (  # noqa: E402
     send_booking_cancelled,
     send_booking_completed,
 )
+import google_calendar as gcal  # noqa: E402
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -109,8 +111,9 @@ async def create_booking(payload: BookingCreate, background_tasks: BackgroundTas
     doc = booking.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.bookings.insert_one(doc)
-    # Send emails in background so the response stays fast
+    # Background side effects: email + calendar event
     background_tasks.add_task(send_booking_received, doc)
+    background_tasks.add_task(gcal.create_event_for_booking, db, doc)
     return booking
 
 
@@ -233,6 +236,47 @@ async def admin_stats(_: bool = Depends(require_admin)):
         by_status[row["_id"] or "pending"] = row["count"]
     total = await db.bookings.count_documents({})
     return {"total": total, "by_status": by_status}
+
+
+# =============================
+# Google Calendar OAuth
+# =============================
+@api_router.get("/admin/google/status")
+async def google_status(_: bool = Depends(require_admin)):
+    return {
+        "configured": gcal.is_configured(),
+        **(await gcal.get_status(db)),
+    }
+
+
+@api_router.get("/admin/google/auth-url")
+async def google_auth_url(_: bool = Depends(require_admin)):
+    if not gcal.is_configured():
+        raise HTTPException(status_code=500, detail="Google OAuth not configured")
+    return {"url": gcal.build_auth_url()}
+
+
+@api_router.post("/admin/google/disconnect")
+async def google_disconnect(_: bool = Depends(require_admin)):
+    await gcal.disconnect(db)
+    return {"ok": True}
+
+
+@api_router.get("/google/oauth-callback")
+async def google_oauth_callback(code: Optional[str] = None, error: Optional[str] = None):
+    frontend = os.environ.get("FRONTEND_URL", "https://dcvaleting.company")
+    if error:
+        return RedirectResponse(f"{frontend}/admin?google=error&reason={error}")
+    if not code:
+        return RedirectResponse(f"{frontend}/admin?google=error&reason=missing_code")
+    try:
+        tokens = gcal.exchange_code_for_tokens(code)
+        email = gcal.fetch_user_email(tokens.get("access_token", ""))
+        await gcal.save_tokens(db, tokens, email)
+        return RedirectResponse(f"{frontend}/admin?google=connected")
+    except Exception as e:
+        logger.exception("Google OAuth callback failed: %s", e)
+        return RedirectResponse(f"{frontend}/admin?google=error&reason=exchange_failed")
 
 
 # Include the router in the main app
