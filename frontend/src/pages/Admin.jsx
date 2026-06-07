@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -152,7 +152,7 @@ function Dashboard({ pw, onLogout }) {
 
   const headers = useMemo(() => ({ "X-Admin-Password": pw }), [pw]);
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await axios.get(`${API}/admin/bookings`, { headers });
@@ -162,16 +162,16 @@ function Dashboard({ pw, onLogout }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [headers]);
 
-  const fetchGoogle = async () => {
+  const fetchGoogle = useCallback(async () => {
     try {
       const { data } = await axios.get(`${API}/admin/google/status`, { headers });
       setGoogle(data);
     } catch {
       /* silently ignore — not critical */
     }
-  };
+  }, [headers]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -188,7 +188,7 @@ function Dashboard({ pw, onLogout }) {
         window.history.replaceState({}, "", "/admin");
       }
     });
-  }, []);
+  }, [fetchAll, fetchGoogle]);
 
   const connectGoogle = async () => {
     setGBusy(true);
