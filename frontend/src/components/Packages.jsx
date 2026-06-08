@@ -176,7 +176,7 @@ export default function Packages({ onBook }) {
                 }`}
               >
                 {p.featured && (
-                  <div className="absolute -top-3 right-8 px-3 py-1 rounded-full bg-white text-black text-[10px] uppercase tracking-[0.22em] font-medium">
+                  <div className="absolute top-5 right-5 z-10 px-3 py-1 rounded-full bg-white text-black text-[10px] uppercase tracking-[0.22em] font-medium shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
                     Most popular
                   </div>
                 )}
