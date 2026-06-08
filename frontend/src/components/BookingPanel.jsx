@@ -5,9 +5,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { CheckCircle2, ChevronRight, Clock, Lock, ShieldCheck, X } from "lucide-react";
 
 const SERVICES = [
+  "Full Package",
+  "Exterior Package",
   "Full Valet",
   "Deep Clean",
-  "Exterior Package",
+  "Exterior Wash",
   "Maintenance Clean",
   "Paint Correction Stage 1",
   "Paint Correction Stage 2",
