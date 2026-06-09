@@ -36,6 +36,13 @@ const SIZES = [
 
 const TIMES = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
 
+const RECURRENCES = [
+  { id: "none", label: "One-off", sub: "Single booking" },
+  { id: "2w", label: "Every 2 weeks", sub: "Auto-rebook fortnightly" },
+  { id: "4w", label: "Every 4 weeks", sub: "Auto-rebook monthly" },
+  { id: "6w", label: "Every 6 weeks", sub: "Auto-rebook every 6 weeks" },
+];
+
 const STEPS = ["SERVICE", "DATE & TIME", "YOUR DETAILS", "CONFIRM"];
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -46,6 +53,7 @@ export default function BookingPanel({ onClose, mobile }) {
   const [size, setSize] = useState(SIZES[0].id);
   const [extras, setExtras] = useState([]);
   const [extrasOpen, setExtrasOpen] = useState(false);
+  const [recurrence, setRecurrence] = useState("none");
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [name, setName] = useState("");
@@ -88,6 +96,7 @@ export default function BookingPanel({ onClose, mobile }) {
         address,
         notes,
         extras: extras.map((id) => EXTRAS.find((e) => e.id === id)?.label).filter(Boolean),
+        recurrence,
       };
       await axios.post(`${API}/bookings`, payload);
       toast.success("Booking confirmed — we'll be in touch shortly.");
@@ -168,6 +177,7 @@ export default function BookingPanel({ onClose, mobile }) {
                 setNotes("");
                 setExtras([]);
                 setExtrasOpen(false);
+                setRecurrence("none");
               }}
               className="btn-outline mt-5"
               data-testid="booking-new"
@@ -285,6 +295,44 @@ export default function BookingPanel({ onClose, mobile }) {
                     </div>
                   )}
                 </div>
+
+                {/* Recurrence */}
+                <div>
+                  <label className="text-[10px] uppercase tracking-[0.22em] text-white/55">
+                    Booking type
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 mt-1.5">
+                    {RECURRENCES.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        data-testid={`booking-recurrence-${r.id}`}
+                        onClick={() => setRecurrence(r.id)}
+                        className={`px-3 py-2.5 rounded-lg border text-left transition ${
+                          recurrence === r.id
+                            ? "bg-white text-black border-white"
+                            : "bg-white/[0.03] text-white/85 border-white/12 hover:border-white/30"
+                        }`}
+                      >
+                        <div className="text-[11px] uppercase tracking-[0.18em] leading-tight">
+                          {r.label}
+                        </div>
+                        <div
+                          className={`text-[10px] mt-0.5 leading-tight ${
+                            recurrence === r.id ? "text-black/65" : "text-white/45"
+                          }`}
+                        >
+                          {r.sub}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {recurrence !== "none" && (
+                    <p className="text-[11px] text-white/55 mt-2 leading-snug">
+                      Subscription bookings auto-rebook after each completed visit. Cancel anytime via the link in your confirmation email.
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -382,6 +430,10 @@ export default function BookingPanel({ onClose, mobile }) {
                       .join(", ")}
                   />
                 )}
+                <SummaryRow
+                  k="Booking type"
+                  v={RECURRENCES.find((r) => r.id === recurrence)?.label || "One-off"}
+                />
                 <SummaryRow k="Date" v={date?.toDateString()} />
                 <SummaryRow k="Time" v={time} />
                 <SummaryRow k="Name" v={name} />

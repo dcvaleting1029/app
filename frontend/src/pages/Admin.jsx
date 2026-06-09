@@ -16,6 +16,7 @@ import {
   RefreshCw,
   CalendarCheck,
   Unlink,
+  Repeat,
 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -143,6 +144,7 @@ export default function Admin() {
 
 function Dashboard({ pw, onLogout }) {
   const [bookings, setBookings] = useState([]);
+  const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -155,8 +157,12 @@ function Dashboard({ pw, onLogout }) {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API}/admin/bookings`, { headers });
-      setBookings(data);
+      const [b, s] = await Promise.all([
+        axios.get(`${API}/admin/bookings`, { headers }),
+        axios.get(`${API}/admin/subscriptions`, { headers }).catch(() => ({ data: [] })),
+      ]);
+      setBookings(b.data);
+      setSubs(s.data || []);
     } catch (e) {
       toast.error("Failed to load bookings");
     } finally {
@@ -460,6 +466,14 @@ function BookingCard({ booking, onStatus, onDelete, isUpdating }) {
             >
               {status}
             </span>
+            {booking.subscription_id && (
+              <span
+                title="Part of a recurring subscription"
+                className="flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] px-2.5 py-1 rounded-full border border-white/15 bg-white/[0.04] text-white/80"
+              >
+                <Repeat size={10} strokeWidth={1.8} /> recurring
+              </span>
+            )}
           </div>
           <div className="text-[11px] uppercase tracking-[0.22em] text-white/45 mt-1">
             Booked {created}

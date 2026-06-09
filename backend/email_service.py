@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "DC Valeting <onboarding@resend.dev>")
 BUSINESS_EMAIL = os.environ.get("BUSINESS_EMAIL", "")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://dcvaleting.company")
+BACKEND_URL = os.environ.get("BACKEND_URL", "https://dc-valeting.onrender.com")
 
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
@@ -22,7 +24,7 @@ BRAND_SILVER = "#c8c8cc"
 BRAND_MUTED = "#888888"
 
 
-def _layout(title: str, intro: str, booking: dict, footer_note: str = "") -> str:
+def _layout(title: str, intro: str, booking: dict, footer_note: str = "", subscription: Optional[dict] = None) -> str:
     rows = [
         ("Service", booking.get("service", "—")),
         ("Vehicle", booking.get("vehicle_size", "—")),
@@ -38,6 +40,10 @@ def _layout(title: str, intro: str, booking: dict, footer_note: str = "") -> str
         rows.append(("Notes", booking["notes"]))
     if booking.get("phone"):
         rows.append(("Phone", booking["phone"]))
+    if subscription:
+        weeks = subscription.get("interval_weeks")
+        if weeks:
+            rows.append(("Recurring", f"Every {weeks} weeks"))
 
     detail_rows = "".join(
         f"""
@@ -48,6 +54,26 @@ def _layout(title: str, intro: str, booking: dict, footer_note: str = "") -> str
         """
         for k, v in rows
     )
+
+    sub_block = ""
+    if subscription and subscription.get("id") and subscription.get("cancel_token"):
+        cancel_url = (
+            f"{BACKEND_URL}/api/subscriptions/cancel"
+            f"?id={subscription['id']}&token={subscription['cancel_token']}"
+        )
+        sub_block = f"""
+        <tr>
+            <td style="padding:18px 36px 0 36px;">
+                <div style="padding:14px 16px;border:1px solid {BRAND_BORDER};border-radius:12px;background:#0c0c0c;">
+                    <div style="font-size:11px;letter-spacing:0.22em;color:{BRAND_MUTED};text-transform:uppercase;">Recurring subscription</div>
+                    <div style="color:#ffffff;font-size:14px;margin-top:6px;line-height:1.5;">
+                        Your next valet is booked automatically every {subscription.get('interval_weeks')} weeks. Cancel anytime —
+                        <a href="{cancel_url}" style="color:#ffffff;text-decoration:underline;">click here to stop</a>.
+                    </div>
+                </div>
+            </td>
+        </tr>
+        """
 
     return f"""
 <!doctype html>
@@ -99,12 +125,13 @@ def _layout(title: str, intro: str, booking: dict, footer_note: str = "") -> str
 """
 
 
-def _booking_received_html(booking: dict) -> str:
+def _booking_received_html(booking: dict, subscription: Optional[dict] = None) -> str:
     return _layout(
         title="Booking received",
         intro=f"Hi {booking.get('name', 'there')}, thanks for booking with DC Valeting. We've received your request and will be in touch shortly to confirm.",
         booking=booking,
         footer_note="You don't need to do anything — we'll confirm by phone or email before your appointment.",
+        subscription=subscription,
     )
 
 
@@ -135,12 +162,16 @@ def _booking_completed_html(booking: dict) -> str:
     )
 
 
-def _business_new_booking_html(booking: dict) -> str:
+def _business_new_booking_html(booking: dict, subscription: Optional[dict] = None) -> str:
+    extra = ""
+    if subscription:
+        extra = f" This booking starts a recurring subscription every {subscription.get('interval_weeks')} weeks."
     return _layout(
         title="New booking received",
-        intro=f"A new booking has been submitted by {booking.get('name', '—')} ({booking.get('email', '—')}).",
+        intro=f"A new booking has been submitted by {booking.get('name', '—')} ({booking.get('email', '—')}).{extra}",
         booking=booking,
         footer_note="Log in to the admin dashboard to confirm or manage this booking.",
+        subscription=subscription,
     )
 
 
@@ -164,7 +195,7 @@ def _send(to: list, subject: str, html: str) -> Optional[str]:
         return None
 
 
-async def send_booking_received(booking: dict) -> None:
+async def send_booking_received(booking: dict, subscription: Optional[dict] = None) -> None:
     """Customer email + business notification when booking is created."""
     customer_email = booking.get("email")
     tasks = []
@@ -174,7 +205,7 @@ async def send_booking_received(booking: dict) -> None:
                 _send,
                 [customer_email],
                 "We've received your DC Valeting booking",
-                _booking_received_html(booking),
+                _booking_received_html(booking, subscription),
             )
         )
     if BUSINESS_EMAIL:
@@ -183,7 +214,7 @@ async def send_booking_received(booking: dict) -> None:
                 _send,
                 [BUSINESS_EMAIL],
                 f"New booking — {booking.get('name', '—')} · {booking.get('service', '—')}",
-                _business_new_booking_html(booking),
+                _business_new_booking_html(booking, subscription),
             )
         )
     if tasks:

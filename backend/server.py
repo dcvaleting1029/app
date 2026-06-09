@@ -10,7 +10,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -60,6 +60,7 @@ class BookingCreate(BaseModel):
     address: Optional[str] = ""
     notes: Optional[str] = ""
     extras: Optional[List[str]] = []
+    recurrence: Optional[str] = "none"  # "none" | "2w" | "4w" | "6w"
 
 
 class Booking(BaseModel):
@@ -76,7 +77,32 @@ class Booking(BaseModel):
     notes: Optional[str] = ""
     extras: Optional[List[str]] = []
     status: str = "pending"
+    recurrence: Optional[str] = "none"
+    subscription_id: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Subscription(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    cancel_token: str = Field(default_factory=lambda: secrets.token_urlsafe(20))
+    name: str
+    email: EmailStr
+    phone: str
+    address: Optional[str] = ""
+    service: str
+    vehicle_size: str
+    time: str
+    extras: Optional[List[str]] = []
+    interval_weeks: int  # 2, 4, or 6
+    next_date: str  # YYYY-MM-DD of the next scheduled booking date
+    active: bool = True
+    runs: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    cancelled_at: Optional[datetime] = None
+
+
+RECURRENCE_TO_WEEKS = {"2w": 2, "4w": 4, "6w": 6}
 
 
 # =============================
@@ -107,12 +133,41 @@ async def get_status_checks():
 
 @api_router.post("/bookings", response_model=Booking)
 async def create_booking(payload: BookingCreate, background_tasks: BackgroundTasks):
-    booking = Booking(**payload.model_dump())
+    data = payload.model_dump()
+    recurrence = (data.pop("recurrence", "none") or "none").lower()
+    booking = Booking(**data, recurrence=recurrence)
+    # Create subscription if applicable
+    sub = None
+    if recurrence in RECURRENCE_TO_WEEKS:
+        weeks = RECURRENCE_TO_WEEKS[recurrence]
+        try:
+            base_date = datetime.strptime(booking.date, "%Y-%m-%d").date()
+        except ValueError:
+            base_date = datetime.now(timezone.utc).date()
+        next_date = (base_date + timedelta(weeks=weeks)).isoformat()
+        sub = Subscription(
+            name=booking.name,
+            email=booking.email,
+            phone=booking.phone,
+            address=booking.address or "",
+            service=booking.service,
+            vehicle_size=booking.vehicle_size,
+            time=booking.time,
+            extras=booking.extras or [],
+            interval_weeks=weeks,
+            next_date=next_date,
+            runs=1,
+        )
+        booking.subscription_id = sub.id
+        sub_doc = sub.model_dump()
+        sub_doc["created_at"] = sub_doc["created_at"].isoformat()
+        await db.subscriptions.insert_one(sub_doc)
+
     doc = booking.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.bookings.insert_one(doc)
-    # Background side effects: email + calendar event
-    background_tasks.add_task(send_booking_received, doc)
+    # Background side effects
+    background_tasks.add_task(send_booking_received, doc, sub.model_dump() if sub else None)
     background_tasks.add_task(gcal.create_event_for_booking, db, doc)
     return booking
 
@@ -212,6 +267,8 @@ async def admin_update_booking_status(
             background_tasks.add_task(send_booking_cancelled, doc)
         elif payload.status == "completed":
             background_tasks.add_task(send_booking_completed, doc)
+            # Auto-create next recurring booking if part of an active subscription
+            background_tasks.add_task(_advance_subscription, doc.get("subscription_id"))
     if isinstance(doc.get('created_at'), str):
         try:
             doc['created_at'] = datetime.fromisoformat(doc['created_at'])
@@ -236,6 +293,89 @@ async def admin_stats(_: bool = Depends(require_admin)):
         by_status[row["_id"] or "pending"] = row["count"]
     total = await db.bookings.count_documents({})
     return {"total": total, "by_status": by_status}
+
+
+# =============================
+# Subscriptions
+# =============================
+async def _advance_subscription(subscription_id: Optional[str]) -> None:
+    """Create the next booking in a recurring subscription, if active."""
+    if not subscription_id:
+        return
+    sub = await db.subscriptions.find_one({"id": subscription_id, "active": True})
+    if not sub:
+        return
+    weeks = int(sub.get("interval_weeks", 4))
+    next_date_str = sub.get("next_date")
+    try:
+        next_date = datetime.strptime(next_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        next_date = datetime.now(timezone.utc).date() + timedelta(weeks=weeks)
+    booking = Booking(
+        service=sub["service"],
+        vehicle_size=sub["vehicle_size"],
+        date=next_date.isoformat(),
+        time=sub["time"],
+        name=sub["name"],
+        email=sub["email"],
+        phone=sub["phone"],
+        address=sub.get("address", "") or "",
+        notes=sub.get("notes", "") or "",
+        extras=sub.get("extras", []) or [],
+        recurrence=f"{weeks}w",
+        subscription_id=sub["id"],
+    )
+    doc = booking.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.bookings.insert_one(doc)
+    new_next = (next_date + timedelta(weeks=weeks)).isoformat()
+    await db.subscriptions.update_one(
+        {"id": subscription_id},
+        {"$set": {"next_date": new_next}, "$inc": {"runs": 1}},
+    )
+    sub_for_email = {k: v for k, v in sub.items() if k != "_id"}
+    try:
+        await send_booking_received(doc, sub_for_email)
+    except Exception as e:
+        logger.warning("Subscription advance email failed: %s", e)
+    try:
+        await gcal.create_event_for_booking(db, doc)
+    except Exception as e:
+        logger.warning("Subscription advance calendar failed: %s", e)
+
+
+@api_router.get("/admin/subscriptions")
+async def admin_list_subscriptions(_: bool = Depends(require_admin)):
+    items = await db.subscriptions.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return items
+
+
+@api_router.post("/admin/subscriptions/{sub_id}/cancel")
+async def admin_cancel_subscription(sub_id: str, _: bool = Depends(require_admin)):
+    res = await db.subscriptions.update_one(
+        {"id": sub_id},
+        {"$set": {"active": False, "cancelled_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    return {"ok": True}
+
+
+@api_router.get("/subscriptions/cancel")
+async def public_cancel_subscription(id: str, token: str):
+    """Public cancellation link from customer emails."""
+    sub = await db.subscriptions.find_one({"id": id})
+    if not sub or not secrets.compare_digest(sub.get("cancel_token", ""), token):
+        raise HTTPException(status_code=404, detail="Invalid cancellation link")
+    if not sub.get("active", True):
+        return {"ok": True, "already_cancelled": True}
+    await db.subscriptions.update_one(
+        {"id": id},
+        {"$set": {"active": False, "cancelled_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    return {"ok": True}
+
+
 
 
 # =============================
