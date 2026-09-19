@@ -9,8 +9,8 @@ const SIGNATURE_PACKAGES = [
     title: "FULL PACKAGE",
     tagline: "Complete protection. Premium finish.",
     desc: "The ultimate all-in-one package for a showroom finish and long-lasting protection inside and out.",
-    price: "£599",
-    priceNote: "Save more with our complete package",
+    price: "From £800",
+    priceNote: "Final quote depends on vehicle size & condition. XL / vans priced individually.",
     columns: [
       {
         title: "Deep Clean Valet",
@@ -56,8 +56,8 @@ const SIGNATURE_PACKAGES = [
     title: "EXTERIOR PACKAGE",
     tagline: "Shine. Protect. Impress.",
     desc: "A complete exterior care package designed to restore your car's shine and protect the finish for long-lasting results.",
-    price: "£450",
-    priceNote: "Professional care. Premium results.",
+    price: "From £650",
+    priceNote: "Final quote depends on vehicle size & condition. XL / vans priced individually.",
     columns: [
       {
         title: "Exterior Deep Clean",
@@ -109,8 +109,9 @@ const STAGE_PACKAGES = [
       "Sealant / Wax Protection",
     ],
     pricing: [
-      { size: "Small / Medium", price: "£180–£220" },
-      { size: "SUV / Large", price: "£230–£280" },
+      { size: "Small / Medium", price: "From £250" },
+      { size: "SUV / Large", price: "From £300" },
+      { size: "XL / Van", price: "Quote on request" },
     ],
     tag: "1 Day Service",
   },
@@ -128,8 +129,9 @@ const STAGE_PACKAGES = [
       "Sealant / Wax Protection",
     ],
     pricing: [
-      { size: "Small / Medium", price: "£300–£400" },
-      { size: "SUV / Large", price: "£450+" },
+      { size: "Small / Medium", price: "From £400" },
+      { size: "SUV / Large", price: "From £500" },
+      { size: "XL / Van", price: "Quote on request" },
     ],
     tag: "1–2 Day Service",
     featured: true,
@@ -335,6 +337,9 @@ export default function Packages({ onBook }) {
                     </span>
                   </div>
                 ))}
+                <p className="text-[10px] text-white/40 pt-2 leading-relaxed">
+                  Starting prices. Final quote depends on vehicle size &amp; condition.
+                </p>
               </div>
 
               <div className="flex items-center justify-between mt-7">
